@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Descobre a interface Wi-Fi usada pelo iwd
+iface=$(iwctl station list | awk 'NR>4 {print $1; exit}')
+
+# Checa se está conectada
+status=$(iwctl station "$iface" show | grep "Connected" | awk '{print $2}')
+
+if [ "$status" = "no" ]; then
+  printf "󰤮 "   # sem conexão
+else
+  # Pega o sinal em dBm (exemplo: -53)
+  signal=$(iwctl station "$iface" show | grep "Signal" | awk '{print $2}')
+
+  # Converte de dBm para escala 0–100
+  # -100 dBm = 0% | -50 dBm = 100%
+  strength=$((2 * (signal + 100)))
+  [ $strength -gt 100 ] && strength=100
+  [ $strength -lt 0 ] && strength=0
+
+  # Ícones conforme a intensidade
+  if [ "$strength" -eq 0 ]; then
+    printf "󰤯 "
+  elif [ "$strength" -le 25 ]; then
+    printf "󰤟 "
+  elif [ "$strength" -le 50 ]; then
+    printf "󰤢 "
+  elif [ "$strength" -le 75 ]; then
+    printf "󰤥 "
+  else
+    printf "󰤨 "
+  fi
+fi
