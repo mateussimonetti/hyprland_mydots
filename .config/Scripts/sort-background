@@ -1,0 +1,17 @@
+#!/bin/bash
+
+IMG_DIR="$HOME/.config/omarchy/current/theme/backgrounds"
+LOCK_LINK="$HOME/.config/omarchy/current/lockscreen"
+
+# tipo pode ser "background" ou "lockscreen"
+TYPE=$1
+
+CURRENT_LINK="$HOME/.config/omarchy/current/$TYPE"
+CURRENT_IMG=$(realpath "$CURRENT_LINK")
+
+NEXT_IMG=$(find "$IMG_DIR" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) \
+  -exec realpath {} \; \
+  | grep -vxF "$CURRENT_IMG" \
+  | shuf -n 1)
+
+ln -sf "$NEXT_IMG" "$LOCK_LINK"
